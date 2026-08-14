@@ -150,17 +150,15 @@ themeToggle.addEventListener("click", () => {
    4. CONTACT FORM
 ========================================================= */
 
-const contactForm =
-    document.querySelector("#contact-form");
+const contactForm = document.querySelector("#contact-form");
+const formMessage = document.querySelector("#form-message");
 
-const formMessage =
-    document.querySelector("#form-message");
-
-
-contactForm.addEventListener("submit", (event) => {
+contactForm.addEventListener("submit", async (event) => {
 
     event.preventDefault();
 
+    const submitButton =
+        contactForm.querySelector("button[type='submit']");
 
     const name =
         document.querySelector("#name").value.trim();
@@ -172,34 +170,78 @@ contactForm.addEventListener("submit", (event) => {
         document.querySelector("#message").value.trim();
 
 
-    /* Check empty fields */
+    /* Check fields */
 
-    if (
-        name === "" ||
-        email === "" ||
-        message === ""
-    ) {
+    if (!name || !email || !message) {
 
         formMessage.textContent =
             "Please complete all fields.";
 
         return;
+    }
+
+
+    /* Sending state */
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Sending...";
+
+    formMessage.textContent = "";
+
+
+    try {
+
+        const formData =
+            new FormData(contactForm);
+
+
+        const response =
+            await fetch(contactForm.action, {
+
+                method: "POST",
+
+                body: formData
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (result.success) {
+
+            formMessage.textContent =
+                "✓ Message sent successfully!";
+
+            contactForm.reset();
+
+        } else {
+
+            formMessage.textContent =
+                "✕ Something went wrong. Please try again.";
+
+        }
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        formMessage.textContent =
+            "✕ Unable to send message. Please try again.";
 
     }
 
 
-    /* Show success message */
+    /* Restore button */
 
-    formMessage.textContent =
-        `Thanks, ${name}! Your message is ready to send.`;
+    submitButton.disabled = false;
 
-
-    /* Clear form */
-
-    contactForm.reset();
+    submitButton.textContent =
+        "→ Send Message";
 
 });
-
 
 /* =========================================================
    5. BACK TO TOP
